@@ -67,6 +67,7 @@ function parseReceiptText(text) {
 }
 
 app.post('/api/analyze-receipt', async (req, res) => {
+  console.log('OCRリクエスト受信')
   const { imageData } = req.body
   if (!imageData) return res.status(400).json({ error: '画像データが見つかりません' })
 
