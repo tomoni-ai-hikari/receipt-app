@@ -89,6 +89,7 @@ app.post('/api/analyze-receipt', async (req, res) => {
     )
 
     const visionData = await visionRes.json()
+    if (!visionRes.ok) throw new Error(`Vision API HTTP ${visionRes.status}: ${JSON.stringify(visionData)}`)
     if (visionData.error) throw new Error(visionData.error.message)
 
     const fullText = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
