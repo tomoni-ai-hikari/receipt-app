@@ -1,0 +1,511 @@
+.app-header {
+  background: #2563eb;
+  color: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.summary-bar {
+  background: white;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.summary-divider {
+  width: 1px;
+  height: 32px;
+  background: #e5e7eb;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.form-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.form-card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 14px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.form-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+}
+
+.btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  opacity: 0.88;
+}
+
+.btn-success {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-success:hover {
+  opacity: 0.88;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #555;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.toolbar h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+}
+
+.table-wrapper {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+thead th {
+  background: #f8fafc;
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr {
+  border-bottom: 1px solid #f1f3f5;
+  transition: background 0.15s;
+}
+
+tbody tr:last-child {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody td {
+  padding: 11px 14px;
+  color: #444;
+}
+
+.amount-cell {
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: #aaa;
+  font-size: 14px;
+}
+
+.edit-input {
+  padding: 5px 8px;
+  border: 1px solid #2563eb;
+  border-radius: 5px;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+}
+
+.monthly-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.monthly-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 14px;
+}
+
+.monthly-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.monthly-table thead th {
+  background: #f8fafc;
+  padding: 9px 14px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.monthly-table thead th:first-child {
+  text-align: left;
+}
+
+.monthly-table tbody tr {
+  border-bottom: 1px solid #f1f3f5;
+  transition: background 0.15s;
+}
+
+.monthly-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.monthly-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.month-label {
+  padding: 10px 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.month-total {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 700;
+  color: #333;
+}
+
+.month-business {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.month-personal {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.zero {
+  color: #ccc;
+}
+
+/* ── 月次集計（収支対応） ── */
+.month-income {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.month-expense {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.month-net-plus {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.month-net-minus {
+  padding: 10px 14px;
+  text-align: right;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+/* ── 収入/支出トグル ── */
+.type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.type-option input { display: none; }
+
+.active-expense {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.active-income {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+/* ── バッジ共通 ── */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.badge-income      { background: #f0fdf4; color: #16a34a; }
+.badge-payment     { background: #fef9c3; color: #92400e; }
+.badge-type-income  { background: #f0fdf4; color: #16a34a; font-weight: 600; }
+.badge-type-expense { background: #fef2f2; color: #ef4444; font-weight: 600; }
+
+/* ── 金額セル（収入） ── */
+.amount-cell-income {
+  font-weight: 600;
+  color: #16a34a;
+  text-align: right;
+}
+
+/* ── 収入追加ボタン ── */
+.btn-income {
+  background: #16a34a;
+  color: white;
+}
+.btn-income:hover { opacity: 0.88; }
+
+/* ── OCRセクション ── */
+.ocr-section {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.ocr-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ocr-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.ocr-hint {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.ocr-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-ocr {
+  background: #334155;
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.btn-ocr:hover:not(:disabled) { opacity: 0.85; }
+.btn-ocr:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ocr-preview-wrap {
+  flex-shrink: 0;
+}
+
+.ocr-preview {
+  height: 64px;
+  width: auto;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  object-fit: cover;
+}
+
+.ocr-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.ocr-msg-loading { background: #eff6ff; color: #2563eb; }
+.ocr-msg-ok      { background: #f0fdf4; color: #16a34a; }
+.ocr-msg-error   { background: #fef2f2; color: #ef4444; }
+
+.ocr-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #93c5fd;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
