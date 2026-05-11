@@ -42,9 +42,9 @@ function parseReceiptText(text) {
     if (n >= 1900 && n <= 2100) return false
     return true
   }
-  const datePattern = /令和|平成|昭和|\d{4}[年\/\-]\d{1,2}[月\/\-]|R\d+[.\/\-]\d/
+  const datePattern = /令和|平成|昭和|\d{4}[年\/\-]\d{1,2}[月\/\-]|R\d+[.\/\-]\d|〒|tel|fax|\d{3}-\d{4}/i
 
-  const totalKw = /合[　 ]?計|お会計|請求[　 ]?額|お支払[　 ]?金額|total/i
+  const totalKw = /合[　 ]?計|お会計|請求[　 ]?額|お支払[　 ]?金額|ご利用料金|駐車料金|料金合計|total/i
   for (const line of lines) {
     if (totalKw.test(line)) {
       // ¥記号付きを優先、なければ3桁以上の数字
@@ -99,7 +99,7 @@ function parseReceiptText(text) {
 
 function suggestCategory(text, storeName) {
   const t = (text + ' ' + (storeName || '')).toLowerCase()
-  if (/駅|電車|バス|タクシー|新幹線|jr|メトロ|suica|pasmo|乗車|運賃|交通/.test(t))
+  if (/駅|電車|バス|タクシー|新幹線|jr|メトロ|suica|pasmo|乗車|運賃|交通|駐車|パーキング|parking/.test(t))
     return { main: 'ビジネス用', sub: '交通費' }
   if (/セミナー|研修|講座|勉強会|ウェビナー|workshop|スクール/.test(t))
     return { main: 'ビジネス用', sub: 'セミナー費' }
@@ -162,6 +162,7 @@ app.post('/api/analyze-receipt', async (req, res) => {
 
     const fullText = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
     console.log(`抽出テキスト長さ=${fullText.length}`)
+    console.log('OCRテキスト全文:', fullText.replace(/\n/g, ' | '))
     if (!fullText) return res.json({ date: null, amount: null, storeName: null })
 
     const parsed = parseReceiptText(fullText)
