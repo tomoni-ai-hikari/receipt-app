@@ -58,6 +58,7 @@ function OcrSection({ onExtract }) {
   const [preview, setPreview] = useState(null)
   const [status, setStatus] = useState(null) // null | 'loading' | 'ok' | 'error'
   const [msg, setMsg] = useState('')
+  const cameraRef = useRef(null)
   const fileRef = useRef(null)
 
   async function handleFile(e) {
@@ -69,55 +70,14 @@ function OcrSection({ onExtract }) {
     reader.readAsDataURL(file)
 
     setStatus('loading')
-    setMsg('画像を圧縮中...')
+    setMsg('AIが読み取り中...')
 
     try {
-      // Canvas で最大800px・JPEG65%に圧縮してからbase64化
-      const compressed = await (async () => {
-        const url = URL.createObjectURL(file)
-        const img = new Image()
-        const loadPromise = new Promise((resolve, reject) => {
-          img.onload = resolve
-          img.onerror = reject
-        })
-        img.src = url
-        await loadPromise
-
-        const MAX = 800
-        let { width: w, height: h } = img
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX }
-          else       { w = Math.round(h * MAX / h); h = MAX }
-        }
-
-        const canvas = document.createElement('canvas')
-        canvas.width = w; canvas.height = h
-        const ctx = canvas.getContext('2d')
-        if (!ctx) throw new Error('Canvas 初期化に失敗しました')
-        ctx.drawImage(img, 0, 0, w, h)
-        URL.revokeObjectURL(url)
-
-        return await new Promise((resolve, reject) => {
-          const timeoutId = window.setTimeout(() => reject(new Error('画像圧縮がタイムアウトしました')), 10000)
-          canvas.toBlob(
-            b => {
-              window.clearTimeout(timeoutId)
-              if (b) resolve(b)
-              else reject(new Error('圧縮失敗'))
-            },
-            'image/jpeg',
-            0.65
-          )
-        })
-      })()
-
-      setMsg('AIが読み取り中...')
-
       const base64 = await new Promise((resolve, reject) => {
         const r = new FileReader()
         r.onload = () => resolve(r.result.split(',')[1])
         r.onerror = reject
-        r.readAsDataURL(compressed)
+        r.readAsDataURL(file)
       })
       const res = await fetch('/api/analyze-receipt', {
         method: 'POST',
@@ -128,7 +88,7 @@ function OcrSection({ onExtract }) {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       onExtract(data)
-      const found = [data.date && '日付', data.amount && '金額', data.storeName && '店名'].filter(Boolean)
+      const found = [data.date && '日付', data.amount && '金額', data.storeName && '店名', data.category && 'カテゴリ'].filter(Boolean)
       setStatus('ok')
       setMsg(found.length ? `${found.join('・')}を読み取りました` : '読み取れませんでした（手動入力してください）')
     } catch (err) {
@@ -146,22 +106,26 @@ function OcrSection({ onExtract }) {
         <span className="ocr-hint">レシート・領収書の写真をアップロードすると自動入力します</span>
       </div>
       <div className="ocr-body">
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          style={{ display: 'none' }}
-          onChange={handleFile}
-        />
-        <button
-          type="button"
-          className="btn btn-ocr"
-          onClick={() => fileRef.current.click()}
-          disabled={status === 'loading'}
-        >
-          {status === 'loading' ? '読み取り中...' : '📷 撮影 / ファイルを選択'}
-        </button>
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFile} />
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-ocr"
+            onClick={() => cameraRef.current.click()}
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? '読み取り中...' : '📷 カメラで撮影'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-ocr"
+            onClick={() => fileRef.current.click()}
+            disabled={status === 'loading'}
+          >
+            📁 ファイルを選択
+          </button>
+        </div>
 
         {preview && (
           <div className="ocr-preview-wrap">
@@ -201,6 +165,10 @@ function ReceiptForm({ onAdd }) {
       date:      data.date      ?? f.date,
       amount:    data.amount    != null ? String(data.amount) : f.amount,
       recipient: data.storeName ?? f.recipient,
+      ...(data.category ? {
+        mainCategory: data.category.main,
+        subCategory:  data.category.sub,
+      } : {}),
     }))
   }
 
@@ -425,6 +393,11 @@ function MonthlyStats({ receipts }) {
 }
 
 // ── CSV出力 ───────────────────────────────────────────────────
+function csvQuote(v) {
+  const s = String(v ?? '')
+  return `"${s.replace(/"/g, '""')}"`
+}
+
 function exportCSV(receipts) {
   const header = ['区分', '日付', '金額', '支払い方法', '大分類', 'カテゴリ', '宛名', '但し書き']
   const rows = receipts.map(r => [
@@ -437,7 +410,7 @@ function exportCSV(receipts) {
     r.recipient,
     r.note,
   ])
-  const csv = [header, ...rows].map(r => r.join(',')).join('\n')
+  const csv = [header, ...rows].map(r => r.map(csvQuote).join(',')).join('\n')
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

@@ -20,10 +20,16 @@ function parseReceiptText(text) {
     let m = line.match(/令和\s*(\d+)年\s*(\d{1,2})月\s*(\d{1,2})日/)
     if (m) { date = `${2018 + +m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; break }
 
+    m = line.match(/平成\s*(\d+)年\s*(\d{1,2})月\s*(\d{1,2})日/)
+    if (m) { date = `${1988 + +m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; break }
+
     m = line.match(/R(\d+)[.\/\-](\d{1,2})[.\/\-](\d{1,2})/)
     if (m) { date = `${2018 + +m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; break }
 
     m = line.match(/(\d{4})[年\/\-](\d{1,2})[月\/\-](\d{1,2})日?/)
+    if (m) { date = `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; break }
+
+    m = line.match(/(\d{4})\.(\d{1,2})\.(\d{1,2})/)
     if (m) { date = `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`; break }
   }
 
@@ -91,6 +97,29 @@ function parseReceiptText(text) {
   return { date, amount, storeName }
 }
 
+function suggestCategory(text, storeName) {
+  const t = (text + ' ' + (storeName || '')).toLowerCase()
+  if (/駅|電車|バス|タクシー|新幹線|jr|メトロ|suica|pasmo|乗車|運賃|交通/.test(t))
+    return { main: 'ビジネス用', sub: '交通費' }
+  if (/セミナー|研修|講座|勉強会|ウェビナー|workshop|スクール/.test(t))
+    return { main: 'ビジネス用', sub: 'セミナー費' }
+  if (/コンサル|顧問|相談|コーチング/.test(t))
+    return { main: 'ビジネス用', sub: 'コンサル費' }
+  if (/電話|通信|インターネット|wifi|docomo|au|softbank|携帯|スマホ/.test(t))
+    return { main: 'ビジネス用', sub: '通信費' }
+  if (/接待|会食|懇親|レストラン|居酒屋|ランチ|ディナー|カフェ/.test(t))
+    return { main: 'ビジネス用', sub: '接待費' }
+  if (/文具|事務|消耗|コピー|印刷|usb|ケーブル|トナー|用紙|文房具/.test(t))
+    return { main: 'ビジネス用', sub: '消耗品' }
+  if (/薬|病院|クリニック|医院|歯科|調剤|眼科|内科|外科|皮膚科/.test(t))
+    return { main: '個人用', sub: '医療費' }
+  if (/スーパー|コンビニ|食料|食品|弁当|惣菜|精肉|鮮魚|青果/.test(t))
+    return { main: '個人用', sub: '食費' }
+  if (/ドラッグ|日用品|雑貨|洗剤|ホームセンター/.test(t))
+    return { main: '個人用', sub: '日用品' }
+  return null
+}
+
 app.post('/api/analyze-receipt', async (req, res) => {
   console.log('OCRリクエスト受信')
   const { imageData } = req.body
@@ -135,7 +164,9 @@ app.post('/api/analyze-receipt', async (req, res) => {
     console.log(`抽出テキスト長さ=${fullText.length}`)
     if (!fullText) return res.json({ date: null, amount: null, storeName: null })
 
-    res.json(parseReceiptText(fullText))
+    const parsed = parseReceiptText(fullText)
+    const category = suggestCategory(fullText, parsed.storeName)
+    res.json({ ...parsed, ...(category ? { category } : {}) })
   } catch (e) {
     console.error('OCRエラー:', e.message)
     res.status(500).json({ error: e.message })
