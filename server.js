@@ -29,19 +29,44 @@ function parseReceiptText(text) {
 
   // --- Amount (合計行を優先、なければ最大金額) ---
   let amount = null
+
+  // 西暦年・日付の数字・100円未満を除外
+  function isLikelyAmount(n) {
+    if (n < 100) return false
+    if (n >= 1900 && n <= 2100) return false
+    return true
+  }
+  const datePattern = /令和|平成|昭和|\d{4}[年\/\-]\d{1,2}[月\/\-]|R\d+[.\/\-]\d/
+
   const totalKw = /合[　 ]?計|お会計|請求[　 ]?額|お支払[　 ]?金額|total/i
   for (const line of lines) {
     if (totalKw.test(line)) {
-      const m = line.match(/([1-9][0-9,]*)/)
-      if (m) { amount = parseInt(m[1].replace(/,/g, ''), 10); if (amount > 0) break }
+      // ¥記号付きを優先、なければ3桁以上の数字
+      const m = line.match(/[¥￥]\s*([1-9][0-9,]+)/) || line.match(/([1-9][0-9,]{2,})/)
+      if (m) {
+        const v = parseInt(m[1].replace(/,/g, ''), 10)
+        if (isLikelyAmount(v)) { amount = v; break }
+      }
     }
   }
   if (!amount) {
     let max = 0
+    // まず¥記号付きの数字から探す（信頼度が高い）
     for (const line of lines) {
-      for (const m of line.matchAll(/[¥￥]?\s*([1-9][0-9,]{2,})/g)) {
+      if (datePattern.test(line)) continue
+      for (const m of line.matchAll(/[¥￥]\s*([1-9][0-9,]{2,})/g)) {
         const v = parseInt(m[1].replace(/,/g, ''), 10)
-        if (v > max) max = v
+        if (isLikelyAmount(v) && v > max) max = v
+      }
+    }
+    // ¥付きで見つからなければ全数字から（日付行・年号除外）
+    if (!max) {
+      for (const line of lines) {
+        if (datePattern.test(line)) continue
+        for (const m of line.matchAll(/([1-9][0-9,]{2,})/g)) {
+          const v = parseInt(m[1].replace(/,/g, ''), 10)
+          if (isLikelyAmount(v) && v > max) max = v
+        }
       }
     }
     if (max > 0) amount = max
@@ -75,29 +100,44 @@ app.post('/api/analyze-receipt', async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: 'GOOGLE_VISION_API_KEY が設定されていません' })
 
   try {
-    const visionRes = await fetch(
-      `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requests: [{
-            image: { content: imageData },
-            features: [{ type: 'TEXT_DETECTION' }]
-          }]
-        })
-      }
-    )
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
 
+    console.log(`Vision API呼び出し開始 imageData長さ=${imageData.length}`)
+    let visionRes
+    try {
+      visionRes = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              image: { content: imageData },
+              features: [{ type: 'TEXT_DETECTION' }]
+            }]
+          }),
+          signal: controller.signal,
+        }
+      )
+    } finally {
+      clearTimeout(timeoutId)
+    }
+
+    console.log(`Vision API応答 status=${visionRes.status}`)
     const visionData = await visionRes.json()
+    console.log('Vision APIレスポンス:', JSON.stringify(visionData).slice(0, 300))
+
     if (!visionRes.ok) throw new Error(`Vision API HTTP ${visionRes.status}: ${JSON.stringify(visionData)}`)
     if (visionData.error) throw new Error(visionData.error.message)
 
     const fullText = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
+    console.log(`抽出テキスト長さ=${fullText.length}`)
     if (!fullText) return res.json({ date: null, amount: null, storeName: null })
 
     res.json(parseReceiptText(fullText))
   } catch (e) {
+    console.error('OCRエラー:', e.message)
     res.status(500).json({ error: e.message })
   }
 })
